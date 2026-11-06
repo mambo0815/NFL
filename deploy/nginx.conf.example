@@ -1,0 +1,35 @@
+# Beispiel für nginx (eigener Server/VPS). Pfade und Domain anpassen.
+# Zertifikat z. B. mit: sudo certbot --nginx -d example.de -d www.example.de
+
+server {
+    listen 80;
+    server_name example.de www.example.de;
+    return 301 https://example.de$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name example.de;
+    # ssl_certificate / ssl_certificate_key setzt certbot
+
+    root /var/www/nfl;          # Inhalt des Ordners dist/ hierhin kopieren
+    index index.html;
+    error_page 404 /404.html;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json application/manifest+json image/svg+xml;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.espncdn.com https://espnmedia-cdn.akamaized.net; font-src 'self'; connect-src 'self' https://site.api.espn.com https://sports.core.api.espn.com https://site.web.api.espn.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'" always;
+
+    location / { try_files $uri $uri/ =404; }
+
+    # "expires" setzt den Cache-Control-Header, ohne die Sicherheits-Header oben zu überschreiben
+    location ~* \.woff2$        { expires 1y; }
+    location ~* \.(png|ico)$    { expires 30d; }
+    location ~* \.(css|js)$     { expires 1h; }
+}

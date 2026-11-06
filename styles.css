@@ -492,6 +492,16 @@ table.data.sticky th:first-child, table.data.sticky td:first-child { position: s
 /* ---------- Fuß ---------- */
 .site-footer { background: var(--turf-deep); color: rgba(255, 255, 255, .7); padding: 1.5rem 0 2rem; font-size: .8125rem; border-top: 4px solid var(--flag); }
 .site-footer .wrap { max-width: 60rem; margin-inline: auto; }
+.site-footer .legal { display: flex; gap: 1.25rem; margin-bottom: .8rem; }
+.site-footer .legal a { color: #fff; font-weight: 600; }
+
+/* ---------- Textseiten (Impressum, Datenschutz, 404) ---------- */
+.prose { max-width: 46rem; }
+.prose h2 { font-size: 1.8rem; margin: 2rem 0 .6rem; }
+.prose h3 { font-size: 1.3rem; margin: 1.4rem 0 .4rem; text-transform: none; }
+.prose ul { padding-left: 1.2rem; }
+.prose a { text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.prose .todo { background: var(--flag); padding: 0 .25em; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

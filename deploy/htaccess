@@ -1,0 +1,45 @@
+# .htaccess für Apache (typisches Shared Hosting). Wird vom Build als dist/.htaccess abgelegt.
+# Voraussetzung: mod_rewrite, mod_headers, mod_expires, mod_deflate (bei fast allen Hostern aktiv).
+
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+Options -Indexes
+
+# --- HTTPS erzwingen ---
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# --- Sicherheits-Header ---
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  # Skripte und Styles nur von der eigenen Domain; Daten und Bilder nur von ESPN
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.espncdn.com https://espnmedia-cdn.akamaized.net; font-src 'self'; connect-src 'self' https://site.api.espn.com https://sports.core.api.espn.com https://site.web.api.espn.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'none'"
+</IfModule>
+
+# --- Kompression ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json application/manifest+json image/svg+xml text/xml
+</IfModule>
+
+# --- Caching ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 month"
+  ExpiresByType text/css "access plus 1 hour"
+  ExpiresByType application/javascript "access plus 1 hour"
+  ExpiresByType text/javascript "access plus 1 hour"
+  ExpiresByType text/html "access plus 5 minutes"
+</IfModule>
+
+AddType application/manifest+json .webmanifest
+AddType font/woff2 .woff2

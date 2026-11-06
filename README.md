@@ -14,6 +14,8 @@ Moderne, deutschsprachige NFL-Website im Football-Look: Spielfeld-Streifen mit Y
 | `leaders.html` | Liga-Leader in 16 Statistik-Kategorien |
 | `player.html?id=…` | Spielerprofil: Saisonwerte, Game Log, Meldungen, Fantasy-Daten |
 | `news.html` | Aktuelle Meldungen mit Bildern |
+| `impressum.html`, `datenschutz.html` | Rechtstexte (Vorlage, Platzhalter vor dem Livegang ausfüllen) |
+| `404.html` | Fehlerseite |
 
 ## Projektaufbau
 
@@ -23,6 +25,8 @@ styles.css        Design (Farben, Typografie, Komponenten)
 js/common.js      Gemeinsame Helfer: API-Zugriff, sicheres HTML-Templating, Kopfzeile, Ticker, Tabs
 js/<seite>.js     Logik je Seite
 fonts/            Lokal gehostete Schriften (Barlow, Big Shoulders Display, SIL OFL)
+deploy/           Build-Skript, .htaccess (Apache) und nginx-Beispiel
+site.webmanifest  Web-App-Manifest
 favicon-download/ Favicons
 ```
 
@@ -49,9 +53,18 @@ Diese Schnittstellen sind nicht dokumentiert und können sich jederzeit ändern.
 
 ## Veröffentlichung
 
-Das Projekt ist rein statisch und lässt sich mit GitHub Pages hosten: *Settings → Pages → Branch `main`, Ordner `/ (root)`*. Alle Pfade sind relativ, die Seite läuft daher auch unter `/NFL/`. Es werden keine externen Schriften oder Tracker geladen. Teamlogos und Spielerfotos kommen von `a.espncdn.com`.
+Schritt für Schritt steht alles in [DEPLOY.md](DEPLOY.md). Kurzfassung:
 
-Für eine eigene Domain gehören ein Impressum und eine Datenschutzerklärung dazu (Pflicht in Deutschland).
+```bash
+# 1. Platzhalter [[…]] in impressum.html und datenschutz.html ausfüllen
+# 2. Bauen (erzeugt dist/ inkl. .htaccess, robots.txt, sitemap.xml)
+python3 deploy/build.py https://deine-domain.de
+# 3. Inhalt von dist/ auf den Webserver hochladen
+```
+
+Der Build bricht ab, solange Platzhalter offen sind. Es werden keine externen Schriften oder Tracker geladen. Teamlogos, Spielerfotos und News-Bilder kommen von ESPN-Servern, was in der Datenschutzerklärung beschrieben ist.
+
+Auf GitHub Pages (`/NFL/`) läuft die Seite ebenfalls, nur die Fehlerseite `404.html` setzt eine Domain im Wurzelverzeichnis voraus.
 
 ## Hinweis
 

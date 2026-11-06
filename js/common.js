@@ -99,7 +99,9 @@
   const errorBox = (e, retry) => html`<div class="notice error" role="alert"><strong>Das hat nicht geklappt.</strong> ${e?.message || e}${retry ? html` <button class="btn" data-retry>Erneut laden</button>` : ''}</div>`;
   const loading = (t = 'Lade Daten') => html`<div class="notice loading" role="status"><span class="spin" aria-hidden="true"></span>${t}</div>`;
   const empty = t => html`<div class="notice">${t}</div>`;
-  const img = (src, cls = '', alt = '') => html`<img class="${cls}" src="${secure(src)}" alt="${alt}" loading="lazy" onerror="this.style.visibility='hidden'">`;
+  const img = (src, cls = '', alt = '') => html`<img class="${cls}" src="${secure(src)}" alt="${alt}" loading="lazy">`;
+  /* Fehlende Bilder ausblenden (ohne Inline-Handler, damit eine strenge CSP möglich ist) */
+  document.addEventListener('error', e => { if (e.target?.tagName === 'IMG') e.target.style.visibility = 'hidden'; }, true);
   const teamLogo = (abbr, cls = 'logo') => img(logo(abbr), cls);
   const headshot = (url, cls = 'hs') => url ? img(url, cls) : html`<span class="${cls} hs-empty"></span>`;
 
@@ -164,7 +166,7 @@
     document.body.prepend(skip);
     const f = document.createElement('footer');
     f.className = 'site-footer';
-    f.innerHTML = val(html`<div class="wrap">Inoffizielles Fan-Projekt ohne Verbindung zur NFL. Die Daten stammen aus öffentlichen ESPN-Schnittstellen und können sich jederzeit ändern. Teamnamen und Logos gehören den jeweiligen Rechteinhabern.</div>`);
+    f.innerHTML = val(html`<div class="wrap"><nav class="legal" aria-label="Rechtliches"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav>Inoffizielles Fan-Projekt ohne Verbindung zur NFL. Die Daten stammen aus öffentlichen ESPN-Schnittstellen und können sich jederzeit ändern. Teamnamen und Logos gehören den jeweiligen Rechteinhabern.</div>`);
     document.body.append(f);
     const main = $('main'); if (main && !main.id) main.id = 'main';
   }
