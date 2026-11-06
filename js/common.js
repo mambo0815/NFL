@@ -37,17 +37,44 @@
 
   /* ---------- Teams & Logos ---------- */
   const logo = abbr => `https://a.espncdn.com/i/teamlogos/nfl/500/${String(abbr || '').toLowerCase()}.png`;
-  let teamsPromise;
-  function teams() {
-    teamsPromise = teamsPromise || getJSON(`${API}/teams`, 3600000).then(d => {
-      const map = {};
-      (d.sports?.[0]?.leagues?.[0]?.teams || []).forEach(({ team: t }) => {
-        map[t.id] = { id: t.id, abbr: t.abbreviation, name: t.displayName, short: t.shortDisplayName, color: t.color, alt: t.alternateColor };
-      });
-      return map;
-    });
-    return teamsPromise;
-  }
+  /* Feste Stammdaten der 32 Teams. Der ESPN-Endpunkt /teams erlaubt keine Browser-Abrufe von fremden
+     Domains (kein CORS-Header), deshalb liegen die Daten hier. Stand: Saison 2026. */
+  const TEAMS = {
+    "1": {"abbr": "ATL", "name": "Atlanta Falcons", "short": "Falcons", "color": "a71930", "alt": "000000"},
+    "2": {"abbr": "BUF", "name": "Buffalo Bills", "short": "Bills", "color": "00338d", "alt": "d50a0a"},
+    "3": {"abbr": "CHI", "name": "Chicago Bears", "short": "Bears", "color": "0b1c3a", "alt": "e64100"},
+    "4": {"abbr": "CIN", "name": "Cincinnati Bengals", "short": "Bengals", "color": "fb4f14", "alt": "000000"},
+    "5": {"abbr": "CLE", "name": "Cleveland Browns", "short": "Browns", "color": "472a08", "alt": "ff3c00"},
+    "6": {"abbr": "DAL", "name": "Dallas Cowboys", "short": "Cowboys", "color": "002a5c", "alt": "b0b7bc"},
+    "7": {"abbr": "DEN", "name": "Denver Broncos", "short": "Broncos", "color": "0a2343", "alt": "fc4c02"},
+    "8": {"abbr": "DET", "name": "Detroit Lions", "short": "Lions", "color": "0076b6", "alt": "bbbbbb"},
+    "9": {"abbr": "GB", "name": "Green Bay Packers", "short": "Packers", "color": "204e32", "alt": "ffb612"},
+    "10": {"abbr": "TEN", "name": "Tennessee Titans", "short": "Titans", "color": "4495d2", "alt": "001532"},
+    "11": {"abbr": "IND", "name": "Indianapolis Colts", "short": "Colts", "color": "003b75", "alt": "ffffff"},
+    "12": {"abbr": "KC", "name": "Kansas City Chiefs", "short": "Chiefs", "color": "e31837", "alt": "ffb612"},
+    "13": {"abbr": "LV", "name": "Las Vegas Raiders", "short": "Raiders", "color": "000000", "alt": "a5acaf"},
+    "14": {"abbr": "LAR", "name": "Los Angeles Rams", "short": "Rams", "color": "003594", "alt": "ffd100"},
+    "15": {"abbr": "MIA", "name": "Miami Dolphins", "short": "Dolphins", "color": "008e97", "alt": "fc4c02"},
+    "16": {"abbr": "MIN", "name": "Minnesota Vikings", "short": "Vikings", "color": "4f2683", "alt": "ffc62f"},
+    "17": {"abbr": "NE", "name": "New England Patriots", "short": "Patriots", "color": "002a5c", "alt": "c60c30"},
+    "18": {"abbr": "NO", "name": "New Orleans Saints", "short": "Saints", "color": "d3bc8d", "alt": "000000"},
+    "19": {"abbr": "NYG", "name": "New York Giants", "short": "Giants", "color": "003c7f", "alt": "c9243f"},
+    "20": {"abbr": "NYJ", "name": "New York Jets", "short": "Jets", "color": "115740", "alt": "ffffff"},
+    "21": {"abbr": "PHI", "name": "Philadelphia Eagles", "short": "Eagles", "color": "06424d", "alt": "000000"},
+    "22": {"abbr": "ARI", "name": "Arizona Cardinals", "short": "Cardinals", "color": "a40227", "alt": "ffffff"},
+    "23": {"abbr": "PIT", "name": "Pittsburgh Steelers", "short": "Steelers", "color": "000000", "alt": "ffb612"},
+    "24": {"abbr": "LAC", "name": "Los Angeles Chargers", "short": "Chargers", "color": "0080c6", "alt": "ffc20e"},
+    "25": {"abbr": "SF", "name": "San Francisco 49ers", "short": "49ers", "color": "aa0000", "alt": "b3995d"},
+    "26": {"abbr": "SEA", "name": "Seattle Seahawks", "short": "Seahawks", "color": "002a5c", "alt": "69be28"},
+    "27": {"abbr": "TB", "name": "Tampa Bay Buccaneers", "short": "Buccaneers", "color": "bd1c36", "alt": "3e3a35"},
+    "28": {"abbr": "WSH", "name": "Washington Commanders", "short": "Commanders", "color": "5a1414", "alt": "ffb612"},
+    "29": {"abbr": "CAR", "name": "Carolina Panthers", "short": "Panthers", "color": "0085ca", "alt": "000000"},
+    "30": {"abbr": "JAX", "name": "Jacksonville Jaguars", "short": "Jaguars", "color": "007487", "alt": "d7a22a"},
+    "33": {"abbr": "BAL", "name": "Baltimore Ravens", "short": "Ravens", "color": "29126f", "alt": "000000"},
+    "34": {"abbr": "HOU", "name": "Houston Texans", "short": "Texans", "color": "021018", "alt": "eb0028"}
+  };
+  Object.entries(TEAMS).forEach(([id, t]) => { t.id = id; });
+  const teams = () => Promise.resolve(TEAMS);
   let seasonPromise;
   const season = () => (seasonPromise = seasonPromise || getJSON(`${API}/scoreboard`, 30000));
 

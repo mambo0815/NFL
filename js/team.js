@@ -1,6 +1,6 @@
 /* Teamseite: Spielplan, Kader, Aufstellung, Statistiken */
 (async function () {
-  const { API, cm, kg, html, render, $, $$, getJSON, fmtShort, fmtTime, teamLogo, headshot, tabs, segmented, errorBox, loading, empty, hex, lum, gameStatus } = NFL;
+  const { API, CORE, teams, season, cm, kg, html, render, $, $$, getJSON, fmtShort, fmtTime, teamLogo, headshot, tabs, segmented, errorBox, loading, empty, hex, lum, gameStatus } = NFL;
   const id = new URLSearchParams(location.search).get('id');
   const content = $('#content');
   if (!id) { render(content, errorBox('Es wurde kein Team ausgewählt. Wähle ein Team auf der Teams-Seite.')); return; }
@@ -14,15 +14,15 @@
     const field = $('#hero');
     field.style.setProperty('--team', c);
     if (lum(c) > 0.45) field.setAttribute('data-light', '');
-    const ne = t.nextEvent?.[0];
+    const ne = t.next;
     let next = '';
     if (ne) {
       const cs = ne.competitions?.[0]?.competitors || [];
-      const opp = cs.find(x => x.id !== t.id);
-      const away = cs.find(x => x.homeAway === 'away')?.id === t.id;
+      const opp = cs.find(x => x.id !== id);
+      const away = cs.find(x => x.homeAway === 'away')?.id === id;
       next = html`<a href="game.html?id=${ne.id}" style="text-decoration:underline">Nächstes Spiel: ${away ? '@' : 'gegen'} ${opp?.team?.displayName || ''}, ${fmtShort(ne.date)} ${fmtTime(ne.date)} Uhr</a>`;
     }
-    const rec = t.record?.items?.[0]?.summary;
+    const rec = t.rec;
     document.title = `${t.displayName} – NFL Gameday`;
     render('#hero-inner', html`<div style="display:flex;gap:clamp(1rem,3vw,2rem);align-items:center;flex-wrap:wrap">
       ${teamLogo(t.abbreviation, 'logo xl')}
@@ -84,13 +84,23 @@
   /* ---------- Aufstellung ---------- */
   async function depth(panel) {
     render(panel, loading('Lade Aufstellung'));
-    const d = await getJSON(`${API}/teams/${id}/depthcharts`, 300000);
-    const forms = d.depthchart || [];
+    const yr = (await season()).season?.year;
+    const [dc, ro] = await Promise.all([
+      getJSON(`${CORE}/seasons/${yr}/teams/${id}/depthcharts?lang=en&region=us`, 300000),
+      getJSON(`${API}/teams/${id}/roster`, 300000)
+    ]);
+    const names = {};
+    (ro.athletes || []).forEach(g => (g.items || []).forEach(a => { names[a.id] = a; }));
+    const forms = dc.items || [];
     if (!forms.length) { render(panel, empty('Für dieses Team ist keine Aufstellung verfügbar.')); return; }
     render(panel, html`<div class="toolbar"><label for="fm" class="sr-only">Formation wählen</label><select id="fm">${forms.map((f, i) => html`<option value="${i}">${f.name}</option>`)}</select><span class="muted">Der erste Spieler jeder Position ist der Starter.</span></div><div id="dc"></div>`);
     const show = i => {
       const pos = forms[i].positions || {};
-      render('#dc', html`<div class="depth">${Object.entries(pos).map(([k, p]) => html`<div class="dpos"><h4>${p.position?.abbreviation || k.toUpperCase()}</h4><ol>${(p.athletes || []).map(a => html`<li><a href="player.html?id=${a.id}">${a.displayName}</a>${a.injuries?.[0] ? html` <span class="status-tag">${a.injuries[0].status}</span>` : ''}</li>`)}</ol></div>`)}</div>`);
+      render('#dc', html`<div class="depth">${Object.entries(pos).map(([k, p]) => html`<div class="dpos"><h4>${p.position?.abbreviation || k.toUpperCase()}</h4><ol>${(p.athletes || []).slice().sort((x, y) => x.rank - y.rank).map(x => {
+        const aid = /athletes\/(\d+)/.exec(x.athlete?.$ref || '')?.[1];
+        const a = names[aid];
+        return html`<li>${aid ? html`<a href="player.html?id=${aid}">${a?.displayName || 'Spieler ' + aid}</a>` : 'Unbekannt'}${a?.injuries?.[0] ? html` <span class="status-tag">${a.injuries[0].status}</span>` : ''}</li>`;
+      })}</ol></div>`)}</div>`);
     };
     $('#fm', panel).addEventListener('change', e => show(+e.target.value));
     show(0);
@@ -114,10 +124,13 @@
   }
 
   try {
-    const [t, ro] = await Promise.all([getJSON(`${API}/teams/${id}`, 120000), getJSON(`${API}/teams/${id}/roster`, 300000).catch(() => null)]);
+    const [sch, ro, tm] = await Promise.all([getJSON(`${API}/teams/${id}/schedule`, 120000), getJSON(`${API}/teams/${id}/roster`, 300000).catch(() => null), teams()]);
+    const info = tm[id] || {};
+    const st = sch.team || {};
     const c = ro?.coach?.[0];
     coach = c ? `${c.firstName} ${c.lastName}` : '';
-    hero(t.team);
+    const next = (sch.events || []).find(e => ['pre', 'in'].includes(e.competitions?.[0]?.status?.type?.state));
+    hero({ displayName: st.displayName || info.name, abbreviation: st.abbreviation || info.abbr, color: st.color || info.color, alternateColor: info.alt, rec: st.recordSummary, standingSummary: st.standingSummary, next });
     content.innerHTML = '<div id="tabs"></div>';
     const FN = { schedule, roster, depth, stats };
     tabs($('#tabs'), [['schedule', 'Spielplan'], ['roster', 'Kader'], ['depth', 'Aufstellung'], ['stats', 'Statistiken']], 'schedule',
