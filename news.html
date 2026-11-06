@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NFL News</title>
-	<link rel="stylesheet" href="styles.css">
-	<link rel="icon" href="favicon-download/favicon.ico" type="image/x-icon">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>News – NFL Gameday</title>
+<meta name="description" content="Aktuelle NFL-News.">
+<meta name="theme-color" content="#082A1F">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/x-icon" href="favicon-download/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-download/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-download/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-download/apple-icon-180x180.png">
+<link rel="manifest" href="favicon-download/manifest.json">
 </head>
 <body>
-    <nav>
-    <ul>
-    <li><a href="index.html">HOME</a></li>
-    <li><a href="news.html">NFL NEWS</a></li>
-    <li><a href="nfl_teams_schedule.html">TEAM SCHEDULE</a></li>
-    </ul>
-    </nav>
-    <h1>NFL News</h1>
-	
-    <div id="news-container">Loading news...</div>
-
-    <script src="app.js"></script>
+<main>
+<section class="field" id="hero">
+  <div class="wrap" id="hero-inner">
+    <div><h1 class="field-title">News</h1><p class="field-sub">Die aktuellen Meldungen aus der Liga.</p></div>
+    <div id="hero-aside"></div>
+  </div>
+</section>
+<div class="wrap content" id="content">
+  <div class="notice loading" role="status"><span class="spin" aria-hidden="true"></span>Lade Daten</div>
+</div>
+</main>
+<script src="js/common.js"></script>
+<script src="js/news.js"></script>
 </body>
-</html>
+</html>
