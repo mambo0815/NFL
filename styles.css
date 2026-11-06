@@ -1,0 +1,97 @@
+body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+			background:#0f1720; color:#fff; padding:20px; text-align:center;
+			display:flex; flex-direction:column; align-items:center;
+        }
+		
+
+	nav ul {
+		text-align: center;
+	}
+
+	nav li {
+		display: inline-block;
+	}
+	nav li a { color: white; }
+		
+        /* GAMES */
+		.game-card {
+			background:#122229; padding:12px; margin:12px auto; border-radius:10px; max-width:760px;
+			text-align:center; display:flex; flex-direction:column; align-items:center; margin-bottom: 10px;
+		}
+        .team {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .team img {
+            height: 30px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+        .score {
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .status {
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .filter {
+            margin: 20px 10px;
+        }
+        .score {
+            font-size: 1.2em;
+        }
+        .finished {
+            background-color: #f9f9f9;
+            border-left: 5px solid #4caf50;
+        }
+		
+		/* NEWS */
+		.news-item {
+			background:#122229;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+			max-width:760px;
+        }
+        .news-item h2 {
+            margin: 0;
+        }
+        .news-item p {
+            margin: 5px 0;
+        }
+		
+		/* DIVISION TEAMS */
+		.division-teams {
+			border: 1px solid #ddd;
+			padding: 15px;
+			margin-bottom: 10px;
+			border-radius: 5px;
+			}
+			.team img {
+			  max-width: 100px;
+			}
+			.filter {
+			  margin-bottom: 20px;
+			}
+				
+  select, button { padding:8px 10px; margin:6px; border-radius:6px; border:none; }
+  button { background:#006778; color:#fff; cursor:pointer; }
+  button:hover { background:#0097a7; }
+
+  .team-row { 
+		display:flex; 
+		justify-content:space-between;
+		align-items:center;
+		max-width:760px;
+		}
+  .team { flex:1; text-align:center; }
+  .team img { height:50px; margin-bottom:4px; }
+  .vs { font-weight:700; margin:0 10px; flex:0; align-self:center; }
+  .score { margin:0 10px; font-weight:700; }
+  .status { margin-top:6px; }
+  .meta { color:#bcd; margin-bottom:10px; }

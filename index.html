@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL-Spielplan</title>
+    <link rel="stylesheet" href="styles.css">
+	<link rel="icon" href="/favicon-download/favicon.ico" type="image/x-icon">
+</head>
+<body>
+		<nav>
+	   <ul>
+		  <li><a href="index.html">HOME</a></li>
+		  <li><a href="news.html">NFL NEWS</a></li>
+		  <li><a href="nfl_teams_schedule.html">TEAM SCHEDULE</a></li>
+	  </ul>
+	</nav>
+	<h1 id="pageTitle">NFL-Spielplan und Ergebnisse</h1>
+	
+    <div class="filter">
+        <label for="teamFilter">Nach Team filtern: </label>
+        <select id="teamFilter">
+            <option value="">Alle Teams</option>
+        </select>
+    </div>
+    <div id="schedule"></div>
+
+    <script>
+        const filterSelect = document.getElementById('teamFilter');
+        const pageTitle = document.getElementById('pageTitle');
+
+        function formatClock(clock) {
+            if (!clock) return '00:00';
+            const minutes = Math.floor(clock / 60); // Ganze Minuten
+            const seconds = clock % 60; // Verbleibende Sekunden
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`; // Format MM:SS
+        }
+
+        function getGameStatus(event) {
+            const currentTime = new Date();
+            const gameTime = new Date(event.date);
+            const statusType = event.status.type.name.toLowerCase();
+            const displayClock = event.status.displayClock;
+            const period = event.status.period || 0;
+
+            if (statusType === 'post') {
+                return 'Beendet';
+            } else if (currentTime > gameTime && (statusType === 'scheduled' || !period)) {
+                return 'Beendet (nach Zeit)';
+            } else if (statusType === 'in' || (displayClock && period > 0)) {
+                return 'Live oder beendet';
+            } else if (currentTime < gameTime) {
+                return 'Geplant';
+            } else {
+                return 'Status unbekannt';
+            }
+        }
+
+        function updateSchedule() {
+            fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard')
+                .then(response => response.json())
+                .then(data => {
+                    const scheduleDiv = document.getElementById('schedule');
+                    scheduleDiv.innerHTML = ''; // Clear previous content
+
+                    // Saisoninformationen im Titel hinzufügen
+                    const seasonYear = data.season.year; // Saisonjahr aus der API
+                    const currentTitle = `NFL-Spielplan und Ergebnisse ${seasonYear}/${seasonYear + 1}`;
+                    pageTitle.textContent = currentTitle; // H1 aktualisieren
+                    document.title = currentTitle; // Browser-Titel aktualisieren
+
+                    // Sammlung aller Teams (für Dropdown-Liste)
+                    const teamSet = new Set();
+
+                    data.events.forEach(event => {
+                        const gameDiv = document.createElement('div');
+                        gameDiv.classList.add('game-card');
+
+                        const gameStatusText = getGameStatus(event);
+
+                        if (gameStatusText.startsWith('Beendet')) {
+                            gameDiv.classList.add('finished');
+                        }
+
+                        const competitors = event.competitions[0].competitors;
+
+                        competitors.forEach(team => {
+                            const teamDiv = document.createElement('div');
+                            teamDiv.classList.add('team');
+
+                            const teamLogo = document.createElement('img');
+                            teamLogo.src = team.team.logo || 'https://via.placeholder.com/30'; // Fallback für fehlendes Logo
+                            teamLogo.alt = team.team.displayName;
+
+                            const teamName = document.createElement('span');
+                            teamName.textContent = team.team.displayName;
+
+                            const teamScore = document.createElement('span');
+                            teamScore.classList.add('score');
+                            teamScore.textContent = team.score || '-'; // Score oder Platzhalter anzeigen
+
+                            teamDiv.appendChild(teamLogo);
+                            teamDiv.appendChild(teamName);
+                            teamDiv.appendChild(teamScore);
+                            gameDiv.appendChild(teamDiv);
+
+                            // Team zum Dropdown hinzufügen
+                            teamSet.add(team.team.displayName);
+                        });
+
+                        // Datum und Status
+                        const gameTime = document.createElement('div');
+                        gameTime.textContent = `Datum: ${new Date(event.date).toLocaleString()}`;
+                        gameDiv.appendChild(gameTime);
+
+                        const gameStatus = document.createElement('div');
+                        const clock = formatClock(event.status.clock); // Uhrzeit formatieren
+                        const period = event.status.period || '-'; // Viertel (Standard "-")
+                        gameStatus.textContent = `Status: ${gameStatusText}, Play Clock: ${clock}, Quarter: ${period}`;
+                        gameStatus.classList.add('status');
+                        gameDiv.appendChild(gameStatus);
+
+                        scheduleDiv.appendChild(gameDiv);
+                    });
+
+                    // Dropdown-Liste mit Teams aktualisieren
+                    updateTeamFilter([...teamSet]);
+
+                    // Filter anwenden
+                    applyFilter();
+                })
+                .catch(error => console.error('Fehler beim Abrufen der Daten:', error));
+        }
+
+        function updateTeamFilter(teams) {
+            // Entferne alte Optionen
+            filterSelect.innerHTML = '<option value="">Alle Teams</option>';
+            teams.sort().forEach(teamName => {
+                const option = document.createElement('option');
+                option.value = teamName;
+                option.textContent = teamName;
+                filterSelect.appendChild(option);
+            });
+        }
+
+        function applyFilter() {
+            const selectedTeam = filterSelect.value;
+            const games = document.querySelectorAll('.game');
+
+            games.forEach(game => {
+                const teamNames = game.querySelectorAll('.team span');
+                const matchesFilter = Array.from(teamNames).some(teamName =>
+                    teamName.textContent === selectedTeam || selectedTeam === ''
+                );
+
+                game.style.display = matchesFilter ? '' : 'none';
+            });
+        }
+
+        // Event-Listener für Dropdown
+        filterSelect.addEventListener('change', applyFilter);
+
+        // Initial load
+        updateSchedule();
+
+        // Update every 60 seconds
+        setInterval(updateSchedule, 60000);
+    </script>
+</body>
+</html>
