@@ -193,7 +193,7 @@
     document.body.prepend(skip);
     const f = document.createElement('footer');
     f.className = 'site-footer';
-    f.innerHTML = val(html`<div class="wrap"><nav class="legal" aria-label="Rechtliches"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav>Inoffizielles Fan-Projekt ohne Verbindung zur NFL. Die Daten stammen aus öffentlichen ESPN-Schnittstellen und können sich jederzeit ändern. Teamnamen und Logos gehören den jeweiligen Rechteinhabern.</div>`);
+    f.innerHTML = val(html`<div class="wrap"><nav class="legal" aria-label="Rechtliches"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="https://ko-fi.com/paweletzki" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a></nav><p>Inoffizielles Fan-Projekt ohne Verbindung zur NFL. Die Daten stammen aus öffentlichen ESPN-Schnittstellen und können sich jederzeit ändern. Teamnamen und Logos gehören den jeweiligen Rechteinhabern.</p></div>`);
     document.body.append(f);
     const main = $('main'); if (main && !main.id) main.id = 'main';
   }
